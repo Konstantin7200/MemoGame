@@ -1,0 +1,27 @@
+.outerCont{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+}
+.container{
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+  gap: 0.5rem;
+  width: 18rem;
+  height: 26rem;
+}
+.card{
+  border: 1px black solid;
+  width:4rem;
+  height:6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: wheat;
+}
+.card.visible{
+  background-color: red;
+}
