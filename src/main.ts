@@ -3,33 +3,45 @@ const counterEl=document.getElementById("counter") as HTMLElement
 const cardContainer=document.getElementById("cardContainer") as HTMLDivElement;
 const resetButton=document.getElementById("resetButton") as HTMLButtonElement;
 const timer=document.getElementById("timer") as HTMLHeadingElement
+const turnCounterEl=document.getElementById("turnCounter") as HTMLElement
 const colors=["red","blue","yellow","pink","purple","black","white","green"]
+const defaultColor="wheat"
 
 let n=4;
 let pickedCard:HTMLDivElement|null=null
 let counter=0
+let turnCounter=0
 let startDate=Date.now()
 let timerChanger=setInterval(setTimer,10)
 
 createMap(n)
 
+type CardData={
+  value:number//value is equal for the pair of cards 
+  open:boolean
+}
 
+function resetColorToDefault(card:HTMLDivElement){
+  card.style.backgroundColor=defaultColor
+}
+function colorCard(card:HTMLDivElement,color:string)
+{
+  card.style.backgroundColor=color
+}
 function setTimer(){
   timer.innerText=`${Math.floor((Date.now()-startDate)/1000)} seconds`
 }
-function setCardContent(arr:number[],cardContent:HTMLParagraphElement):number[]{
+function setCardContent(arr:number[]):[CardData,number[]]{
   let index=Math.floor(Math.random()*arr.length)
   let num=arr[index]
   if(num%10===1)
     arr=arr.filter((el)=>el!==num)
   else arr[index]--;
-  cardContent.innerText=`${Math.floor(num/10)}`
-  cardContent.style.backgroundColor=colors[Math.floor(num/10)-1]
-  cardContent.style.color=colors[Math.floor(num/10)-1]
-  return arr
+  let cardContent:CardData={value:Math.floor(num/10),open:false}
+  return [cardContent,arr]
 }
 
-function createCards(cardStorage:Map<HTMLDivElement,HTMLParagraphElement|null>){
+function createCards(cardStorage:Map<HTMLDivElement,CardData|null>){
    for(let i=0;i<n;i++)
       for(let j=0;j<n;j++)
       {
@@ -37,15 +49,16 @@ function createCards(cardStorage:Map<HTMLDivElement,HTMLParagraphElement|null>){
       card.classList.add("card");
       card.id=`card${i}${j}`
       card.addEventListener('click',()=>{
-        if(card.classList.contains("visible"))
+        if(cardStorage.get(card)!.open)
           return;
         else{
-          card.classList.add("visible")
-          card.appendChild(cardStorage.get(card)!)
+          colorCard(card,colors[cardStorage.get(card)!.value-1])
           if(pickedCard===null)
             pickedCard=card
           else{
-            if(cardStorage.get(pickedCard)!.innerText===cardStorage.get(card)!.innerText)
+            turnCounter++;
+            turnCounterEl.innerText=`${turnCounter} turns spent`
+            if(cardStorage.get(pickedCard)!.value===cardStorage.get(card)!.value)
             {
               counter++;
               counterEl.innerText=`${counter} cards found`
@@ -53,10 +66,10 @@ function createCards(cardStorage:Map<HTMLDivElement,HTMLParagraphElement|null>){
             else{
               let temp=pickedCard
               setTimeout(()=>{
-                card.classList.remove("visible")
-                temp.classList.remove("visible")
-                temp.removeChild(cardStorage.get(temp)!)
-                card.removeChild(cardStorage.get(card)!)
+                cardStorage.get(card)!.open=false;
+                cardStorage.get(temp)!.open=false;
+                resetColorToDefault(card)
+                resetColorToDefault(temp)
               },500)
             }
             pickedCard=null;
@@ -64,41 +77,38 @@ function createCards(cardStorage:Map<HTMLDivElement,HTMLParagraphElement|null>){
         }
         })
         cardStorage.set(card,null)
+        cardContainer.appendChild(card);
       }
 }
 
-function initCards(cardStorage:Map<HTMLDivElement,HTMLParagraphElement|null>,arr:number[]){
+function initCards(cardStorage:Map<HTMLDivElement,CardData|null>,arr:number[]){
   for(let i=0;i<arr.length;i++)
     arr[i]=(i+1)*10+2
   cardStorage.forEach((p,card)=>{
-    const cardContent=document.createElement("p")
-    cardContent.classList.add("cardContent")
-    arr=setCardContent(arr,cardContent)
+    let cardContent;
+    [cardContent,arr]=setCardContent(arr)
     cardStorage.set(card,cardContent);
-    cardContainer.appendChild(card);
   })
 }
-function resetCards(cardStorage:Map<HTMLDivElement,HTMLParagraphElement|null>){
+function resetCards(cardStorage:Map<HTMLDivElement,CardData|null>){
   cardStorage.forEach((p,card)=>{
-    if(card.classList.contains("visible"))
-    {
-      card.removeChild(p!)
-      card.classList.remove("visible")
-    }
+    resetColorToDefault(card)
   })
 }
 
 function createMap(n:number){
   let arr=new Array(n*n/2)
-  let cardStorage=new Map<HTMLDivElement,HTMLParagraphElement|null>()
+  let cardStorage=new Map<HTMLDivElement,CardData|null>()
   createCards(cardStorage)
   initCards(cardStorage,arr)
   resetButton.addEventListener('click',()=>{
     startDate=Date.now()
     counter=0
+    turnCounter=0
     resetCards(cardStorage)
     initCards(cardStorage,arr)
     counterEl.innerText="0 cards found"
+    turnCounterEl.innerText="0 turns spent"
   })
 }
 
