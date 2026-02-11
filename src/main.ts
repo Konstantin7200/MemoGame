@@ -37,14 +37,24 @@ function colorCard(card:HTMLDivElement,color:string)
 function setTimer(){
   timer.innerText=`${Math.floor((Date.now()-gameState.startDate)/1000)} seconds`
 }
-function setCardContent(arr:number[]):[CardData,number[]]{
-  let index=Math.floor(Math.random()*arr.length)
-  let num=arr[index]
-  if(num%10===1)
-    arr=arr.filter((el)=>el!==num)
-  else arr[index]--;
-  let cardContent:CardData={value:Math.floor(num/10),open:false}
-  return [cardContent,arr]
+function getCardContent(valueMap:Map<number,number>):CardData{
+  if(valueMap.size===0)
+  {
+    throw new Error("ValueMap is empty")
+  }
+  let index=Math.floor(Math.random()*valueMap.size)
+  for(let [key,value] of valueMap){
+    if(index===0)
+    {
+      let cardContent:CardData={value:key,open:false}
+      valueMap.set(key,value-1)
+      if(valueMap.get(key)==0)
+        valueMap.delete(key)
+      return cardContent 
+    }
+    else index--;
+  }
+  throw new Error("Super duper undexpected error")
 }
 
 function createCards(cardStorage:Map<HTMLDivElement,CardData|null>){
@@ -92,12 +102,14 @@ function createCards(cardStorage:Map<HTMLDivElement,CardData|null>){
       }
 }
 
-function initCards(cardStorage:Map<HTMLDivElement,CardData|null>,arr:number[]){
-  for(let i=0;i<arr.length;i++)
-    arr[i]=i*10+2
+function initCards(cardStorage:Map<HTMLDivElement,CardData|null>){
+  let valueMap=new Map<number,number>()
+  for(let i=0;i<gameState.cardsAmount/2;i++)
+  {
+    valueMap.set(i,2)//i--value 2--cards left
+  }  
   cardStorage.forEach((p,card)=>{
-    let cardContent;
-    [cardContent,arr]=setCardContent(arr)
+    let cardContent=getCardContent(valueMap)
     cardStorage.set(card,cardContent);
   })
 }
@@ -109,16 +121,15 @@ function resetCards(cardStorage:Map<HTMLDivElement,CardData|null>){
 }
 
 function createMap(){
-  let arr=new Array(gameState.cardsAmount/2)
   let cardStorage=new Map<HTMLDivElement,CardData|null>()
   createCards(cardStorage)
-  initCards(cardStorage,arr)
+  initCards(cardStorage)
   resetButton.addEventListener('click',()=>{
     gameState.startDate=Date.now()
     gameState.counter=0
     gameState.turnCounter=0
     resetCards(cardStorage)
-    initCards(cardStorage,arr)
+    initCards(cardStorage)
     counterEl.innerText="0 cards found"
     turnCounterEl.innerText="0 turns spent"
   })
