@@ -7,14 +7,20 @@ const turnCounterEl=document.getElementById("turnCounter") as HTMLElement
 const colors=["red","blue","yellow","pink","purple","black","white","green"]
 const defaultColor="wheat"
 
-let n=4;
-let pickedCard:HTMLDivElement|null=null
-let counter=0
-let turnCounter=0
-let startDate=Date.now()
+
+const gameState={
+  cardsAmount:16,
+  get n(){
+    return Math.sqrt(this.cardsAmount)
+  },
+  counter:0,
+  turnCounter:0,
+  startDate:Date.now(),
+  pickedCard:null as HTMLDivElement|null
+}
 let timerChanger=setInterval(setTimer,10)
 
-createMap(n)
+createMap()
 
 type CardData={
   value:number//value is equal for the pair of cards 
@@ -29,7 +35,7 @@ function colorCard(card:HTMLDivElement,color:string)
   card.style.backgroundColor=color
 }
 function setTimer(){
-  timer.innerText=`${Math.floor((Date.now()-startDate)/1000)} seconds`
+  timer.innerText=`${Math.floor((Date.now()-gameState.startDate)/1000)} seconds`
 }
 function setCardContent(arr:number[]):[CardData,number[]]{
   let index=Math.floor(Math.random()*arr.length)
@@ -42,29 +48,34 @@ function setCardContent(arr:number[]):[CardData,number[]]{
 }
 
 function createCards(cardStorage:Map<HTMLDivElement,CardData|null>){
-   for(let i=0;i<n;i++)
-      for(let j=0;j<n;j++)
+   for(let i=0;i<gameState.n;i++)
+      for(let j=0;j<gameState.n;j++)
       {
       const card=document.createElement("div");
       card.classList.add("card");
       card.id=`card${i}${j}`
       card.addEventListener('click',()=>{
         if(cardStorage.get(card)!.open)
+        {
           return;
+        }
         else{
-          colorCard(card,colors[cardStorage.get(card)!.value-1])
-          if(pickedCard===null)
-            pickedCard=card
+          colorCard(card,colors[cardStorage.get(card)!.value])
+          cardStorage.get(card)!.open=true;
+          if(gameState.pickedCard===null)
+          {
+            gameState.pickedCard=card
+          }
           else{
-            turnCounter++;
-            turnCounterEl.innerText=`${turnCounter} turns spent`
-            if(cardStorage.get(pickedCard)!.value===cardStorage.get(card)!.value)
+            gameState.turnCounter++;
+            turnCounterEl.innerText=`${gameState.turnCounter} turns spent`
+            if(cardStorage.get(gameState.pickedCard)!.value===cardStorage.get(card)!.value)
             {
-              counter++;
-              counterEl.innerText=`${counter} cards found`
+              gameState.counter++;
+              counterEl.innerText=`${gameState.counter} cards found`
             }
             else{
-              let temp=pickedCard
+              let temp=gameState.pickedCard
               setTimeout(()=>{
                 cardStorage.get(card)!.open=false;
                 cardStorage.get(temp)!.open=false;
@@ -72,7 +83,7 @@ function createCards(cardStorage:Map<HTMLDivElement,CardData|null>){
                 resetColorToDefault(temp)
               },500)
             }
-            pickedCard=null;
+            gameState.pickedCard=null;
           }
         }
         })
@@ -83,28 +94,29 @@ function createCards(cardStorage:Map<HTMLDivElement,CardData|null>){
 
 function initCards(cardStorage:Map<HTMLDivElement,CardData|null>,arr:number[]){
   for(let i=0;i<arr.length;i++)
-    arr[i]=(i+1)*10+2
+    arr[i]=i*10+2
   cardStorage.forEach((p,card)=>{
     let cardContent;
     [cardContent,arr]=setCardContent(arr)
     cardStorage.set(card,cardContent);
   })
 }
+
 function resetCards(cardStorage:Map<HTMLDivElement,CardData|null>){
   cardStorage.forEach((p,card)=>{
     resetColorToDefault(card)
   })
 }
 
-function createMap(n:number){
-  let arr=new Array(n*n/2)
+function createMap(){
+  let arr=new Array(gameState.cardsAmount/2)
   let cardStorage=new Map<HTMLDivElement,CardData|null>()
   createCards(cardStorage)
   initCards(cardStorage,arr)
   resetButton.addEventListener('click',()=>{
-    startDate=Date.now()
-    counter=0
-    turnCounter=0
+    gameState.startDate=Date.now()
+    gameState.counter=0
+    gameState.turnCounter=0
     resetCards(cardStorage)
     initCards(cardStorage,arr)
     counterEl.innerText="0 cards found"
