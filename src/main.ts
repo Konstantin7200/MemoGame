@@ -4,20 +4,47 @@ const cardContainer=document.getElementById("cardContainer") as HTMLDivElement;
 const resetButton=document.getElementById("resetButton") as HTMLButtonElement;
 const timer=document.getElementById("timer") as HTMLHeadingElement
 const turnCounterEl=document.getElementById("turnCounter") as HTMLElement
-const colors=["red","blue","yellow","pink","purple","black","white","green"]
+const colors = [
+  "red", "blue", "yellow", "pink", "purple", 
+  "black", "white", "green", "orange", "brown",
+  "gray", "cyan", "magenta", "lime", "indigo",
+  "violet", "gold", "silver", "coral", "navy",
+  "maroon", "teal", "olive", "beige", "lavender",
+  "turquoise", "tan", "crimson", "plum", "orchid",
+  "salmon", "khaki", "ivory", "charcoal", "peach",
+  "mint", "rust", "amber", "emerald", "jade",
+  "cobalt", "ruby", "rose", "sky", "slate",
+  "bronze", "copper", "mustard", "lavender", "apricot",
+  "fuschia", "lilac", "cream", "periwinkle", "mauve",
+  "taupe", "terracotta", "champagne", "eggplant", "sienna",
+  "ochre", "sepia", "sage", "alabaster"
+]
+const urlParams = new URLSearchParams(window.location.search);
 const defaultColor="wheat"
 
+const sizeOptions=[2,4,6,8,10]
 
 const gameState={
-  cardsAmount:16,
-  get n(){
-    return Math.sqrt(this.cardsAmount)
+  n:sizeOptions.includes(Number(urlParams.get("size")))?Number(urlParams.get("size")):2,
+  get cardsAmount(){
+    return gameState.n*gameState.n;
   },
   counter:0,
   turnCounter:0,
   startDate:Date.now(),
   pickedCard:null as HTMLDivElement|null
 }
+
+let gridSettings="";
+let width=gameState.n*4.5
+let height=gameState.n*6.5
+for(let i=0;i<gameState.n;i++){
+  gridSettings+="1fr ";
+}
+cardContainer.style.width=width+"rem"
+cardContainer.style.height=height+"rem"
+cardContainer.style.gridTemplateColumns=gridSettings
+cardContainer.style.gridTemplateRows=gridSettings
 let timerChanger=setInterval(setTimer,10)
 
 createMap()
@@ -126,8 +153,11 @@ function createMap(){
   initCards(cardStorage)
   resetButton.addEventListener('click',()=>{
     gameState.startDate=Date.now()
+    clearInterval(timerChanger)
+    timerChanger=setInterval(setTimer,10)
     gameState.counter=0
     gameState.turnCounter=0
+    gameState.pickedCard=null
     resetCards(cardStorage)
     initCards(cardStorage)
     counterEl.innerText="0 cards found"

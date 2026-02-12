@@ -2,21 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="./src/style.css" rel="stylesheet">
     <title>Memo Game</title>
   </head>
   <body>
-    <div class="outerCont">
-      <h1 id="timer">0 seconds</h1>
-      <h1 id="turnCounter">0 turns spent</h1>
-      <h1 id="counter">0 cards found</h1>
-      <div class="container" id="cardContainer"></div>
-      <button id="resetButton">Reset game</button>
+    <div class="indexOuterCont">
+      <div class="rowCont">
+        <button>2*2</button>
+        <button>4*4</button>
+        <button>6*6</button>
+        <button>8*8</button>
+        <button>10*10</button>
+      </div>
     </div>
-
-
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="./src/mainPage.ts"></script>
   </body>
 </html>

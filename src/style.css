@@ -3,16 +3,11 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  height: 100vh;
-  width: 100vw;
+  gap: 1rem;
 }
 .container{
   display: grid;
-  grid-template-columns: auto auto auto auto;
-  grid-template-rows: 1fr 1fr 1fr 1fr;
   gap: 0.5rem;
-  width: 18rem;
-  height: 26rem;
 }
 .cardContent{
   width: 100%;
@@ -32,4 +27,18 @@
 }
 .card.visible{
   background-color: red;
+}
+
+.rowCont{
+  display: flex;
+  flex-direction: row;
+  gap:1rem;
+}
+.indexOuterCont{
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1rem;
 }
